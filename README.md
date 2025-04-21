@@ -38,9 +38,6 @@ Run the project on a local server (e.g., XAMPP or WAMP).
 🎮 Why Gamified?
 Gamification adds a layer of motivation by rewarding consistency and making habit tracking feel like leveling up in a game — making self-improvement more fun and sustainable!
 
-📸 Screenshots
-Add some screenshots or a demo GIF here to showcase the UI and features.
-
 📬 Feedback
 Have ideas or improvements? Feel free to open an issue or submit a pull request!
 
