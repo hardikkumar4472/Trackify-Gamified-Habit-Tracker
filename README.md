@@ -28,7 +28,7 @@ A fun and interactive web-based habit tracker designed to help users build bette
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/gamified-habit-tracker.git
+   git clone https:https://github.com/hardikkumar4472/Trackify-Gamified-Habit-Tracker
 Import the SQL file into your MySQL database.
 
 Configure your database credentials in config.php.
