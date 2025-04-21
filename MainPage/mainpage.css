@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Satoshi:wght@400;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    scroll-behavior:smooth
+}
+body {
+    font-weight: bolder; 
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    perspective: 1000px; 
+    overflow-x: hidden;
+
+}
+
+#habitimgg {
+    filter: drop-shadow(10px 4px 70px rgb(0, 26, 255));
+    transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+#habitimgg:hover {
+    transform: scale(1.05) rotateY(10deg); 
+}
+
+.font-satoshi {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.font-abril-fatface {
+    font-family: 'Abril Fatface', cursive;
+}
+
+/* Animation Styles */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    opacity: 0.1;
+    transform: translateY(20px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.9);
+    }
+    to {
+        transform: scale(1 );
+    }
+}
+
+.scale-up {
+    animation: scaleUp 0.5s ease forwards;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px) rotateY(5deg); 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hover\:rotate-1:hover {
+    transform: rotate(1deg);
+}
+
+.hover\:scale-110:hover {
+    transform: scale(1.1);
+}
+
+.hover\:scale-105:hover {
+    transform: scale(1.05);
+}
+
+.hover\:shadow-lg:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.text-gray-600 {
+    transition: color 0.3s ease;
+}
+
+.text-gray-600:hover {
+    color: #1d4ed8; 
+}
+
+
+
+#h1, #h11, #h111 {
+    background-color: #757b8c;
+    padding: 6px;
+    color: rgb(255, 255, 255);
+    border-radius: 20px;
+}
+
+#h1:hover, #h11:hover, #h111:hover {
+    background-color: #000000;
+    padding: 6px;
+    color: rgb(255, 255, 255);
+    border-radius: 10px;
+    transition: 0.5s;
+}
+
+#bbh {
+    text-shadow: 2px 2px 4px green;
+}
+
+#bbl {
+    text-shadow: 2px 2px 4px orange;
+}
+
+#header {
+    background-color: #212121d6;
+}
+@media (max-width: 768px) {
+    #tt{
+        display: none;
+    }
+}

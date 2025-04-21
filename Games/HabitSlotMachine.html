@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Slot Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Abril Fatface', cursive;
+        }
+        .slot {
+            transition: transform 0.1s;
+        }
+        .spinning {
+            animation: spin 0.1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-5xl text-center mb-16 text-purple-400">Habit Slot Machine</h1>
+        
+        <div class="p-8 bg-gray-800 rounded-xl shadow-2xl max-w-2xl mx-auto">
+            <h2 class="text-3xl mb-6 text-blue-300">Spin for Daily Habits</h2>
+            <p class="mb-6 text-green-200">Complete the habits you land on for bonus points!</p>
+            
+            <div class="flex justify-between items-center mb-8">
+                <div class="text-2xl">
+                    Score: <span id="score" class="text-orange-400">0</span>
+                </div>
+                <div>
+                    <button id="spin" class="px-8 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-xl mr-4">SPIN</button>
+                    <button id="reset" class="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition">Reset</button>
+                </div>
+            </div>
+            
+            <div class="flex justify-center gap-4 mb-8">
+                <div id="slot1" class="slot w-24 h-32 bg-gray-700 rounded-lg flex items-center justify-center text-4xl">?</div>
+                <div id="slot2" class="slot w-24 h-32 bg-gray-700 rounded-lg flex items-center justify-center text-4xl">?</div>
+                <div id="slot3" class="slot w-24 h-32 bg-gray-700 rounded-lg flex items-center justify-center text-4xl">?</div>
+            </div>
+            
+            <div id="result" class="text-center text-2xl h-10 text-green-300 mb-6"></div>
+            
+            <div id="habits-list" class="mt-8">
+                <h3 class="text-xl text-orange-300 mb-4">Today's Habits:</h3>
+                <ul id="habits" class="space-y-2"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slotHabits = [
+            { emoji: "🏋️", name: "Exercise 30 mins", value: 5 },
+            { emoji: "📚", name: "Read 10 pages", value: 4 },
+            { emoji: "🧘", name: "Meditate 5 mins", value: 3 },
+            { emoji: "💧", name: "Drink 8 glasses", value: 2 },
+            { emoji: "😴", name: "Sleep 8 hours", value: 4 },
+            { emoji: "🍎", name: "Eat healthy", value: 3 }
+        ];
+        
+        let score = 0;
+        const scoreElement = document.getElementById('score');
+        const resetBtn = document.getElementById('reset');
+        const spinBtn = document.getElementById('spin');
+        const slots = [
+            document.getElementById('slot1'),
+            document.getElementById('slot2'), 
+            document.getElementById('slot3')
+        ];
+        const resultDisplay = document.getElementById('result');
+        const habitsList = document.getElementById('habits');
+        
+        spinBtn.addEventListener('click', () => {
+            resultDisplay.textContent = "";
+            spinBtn.disabled = true;
+            
+            slots.forEach(slot => {
+                slot.classList.add('spinning');
+            });
+            
+            let spins = 0;
+            const spinInterval = setInterval(() => {
+                slots.forEach(slot => {
+                    const randomHabit = slotHabits[Math.floor(Math.random() * slotHabits.length)];
+                    slot.textContent = randomHabit.emoji;
+                    slot.setAttribute('data-habit', randomHabit.name);
+                    slot.setAttribute('data-value', randomHabit.value);
+                });
+                
+                spins++;
+                if (spins > 15) {
+                    clearInterval(spinInterval);
+                    checkResult();
+                    spinBtn.disabled = false;
+                    slots.forEach(slot => {
+                        slot.classList.remove('spinning');
+                    });
+                }
+            }, 100);
+        });
+        
+        function checkResult() {
+            const values = slots.map(slot => slot.textContent);
+            const habitNames = slots.map(slot => slot.getAttribute('data-habit'));
+            
+            if (values[0] === values[1] && values[1] === values[2]) {
+                score += 20;
+                resultDisplay.textContent = "JACKPOT! +20 points";
+            } 
+            else if (values[0] === values[1] || values[1] === values[2] || values[0] === values[2]) {
+                score += 10;
+                resultDisplay.textContent = "DOUBLE! +10 points";
+            } 
+            else {
+                score += 5;
+                resultDisplay.textContent = "Keep going! +5 points";
+            }
+            
+            scoreElement.textContent = score;
+            
+            const uniqueHabits = [...new Set(habitNames)];
+            habitsList.innerHTML = '';
+            uniqueHabits.forEach(habit => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2 bg-gray-700 p-3 rounded-lg';
+                li.innerHTML = `
+                    <span class="text-2xl">${slots.find(s => s.getAttribute('data-habit') === habit).textContent}</span>
+                    <span>${habit}</span>
+                    <button class="ml-auto complete-btn px-3 py-1 bg-green-600 rounded hover:bg-green-700 transition">Complete</button>
+                `;
+                habitsList.appendChild(li);
+            });
+            
+            document.querySelectorAll('.complete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const habitItem = e.target.closest('li');
+                    const value = parseInt(slots.find(s => s.textContent === habitItem.querySelector('span').textContent).getAttribute('data-value'));
+                    score += value;
+                    scoreElement.textContent = score;
+                    habitItem.innerHTML = `<span class="text-green-400">✓ Completed! +${value} points</span>`;
+                    setTimeout(() => {
+                        habitItem.remove();
+                    }, 1500);
+                });
+            });
+        }
+        
+        resetBtn.addEventListener('click', () => {
+            score = 0;
+            scoreElement.textContent = score;
+            slots.forEach(slot => slot.textContent = "?");
+            resultDisplay.textContent = "";
+            habitsList.innerHTML = '';
+        });
+    </script>
+</body>
+</html>

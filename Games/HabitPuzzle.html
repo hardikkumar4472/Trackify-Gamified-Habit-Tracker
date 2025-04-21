@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Puzzle Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Abril Fatface', cursive;
+        }
+        .puzzle-piece {
+            transition: all 0.3s ease;
+        }
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-5xl text-center mb-16 text-orange-400">Habit Puzzle</h1>
+        
+        <div class="p-8 bg-gray-800 rounded-xl shadow-2xl max-w-4xl mx-auto">
+            <h2 class="text-3xl mb-6 text-blue-300">Complete the Habit Puzzle</h2>
+            <p class="mb-6 text-green-200">Drag puzzle pieces to form complete habits!</p>
+            
+            <div class="flex justify-between items-center mb-8">
+                <div class="text-2xl">
+                    Score: <span id="score" class="text-orange-400">0</span>
+                </div>
+                <button id="reset" class="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition">Reset</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl text-white mb-4">Puzzle Pieces</h3>
+                    <div id="pieces" class="grid grid-cols-2 gap-4 min-h-48 p-4 bg-gray-700 rounded-lg">
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl text-white mb-4">Completed Habits</h3>
+                    <div id="completed" class="min-h-48 p-4 bg-gray-700 rounded-lg space-y-3">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="message" class="text-center text-xl mt-6 h-8 text-green-300"></div>
+        </div>
+    </div>
+
+    <script>
+        const habitParts = {
+            prefixes: ["Morning", "Daily", "Weekly", "Evening", "Afternoon", "Night"],
+            actions: ["Exercise", "Reading", "Meditation", "Journaling", "Water", "Stretching"],
+            durations: ["for 10 mins", "for 30 mins", "for 1 hour", "8 glasses", "5 pages", "3 sessions"]
+        };
+        
+        let score = 0;
+        const scoreElement = document.getElementById('score');
+        const resetBtn = document.getElementById('reset');
+        const piecesContainer = document.getElementById('pieces');
+        const completedContainer = document.getElementById('completed');
+        const messageElement = document.getElementById('message');
+        let draggedPiece = null;
+        let correctCombinations = [];
+        
+        function generatePuzzle() {
+            piecesContainer.innerHTML = '';
+            completedContainer.innerHTML = '';
+            correctCombinations = [];
+            messageElement.textContent = "";
+            
+            const allPieces = [
+                ...habitParts.prefixes.map(text => ({ type: 'prefix', text })),
+                ...habitParts.actions.map(text => ({ type: 'action', text })),
+                ...habitParts.durations.map(text => ({ type: 'duration', text }))
+            ].sort(() => Math.random() - 0.5).slice(0, 6);
+            
+            allPieces.forEach((piece, index) => {
+                const pieceElement = document.createElement('div');
+                pieceElement.className = `puzzle-piece p-3 rounded-lg cursor-grab bg-${getRandomColor()}-500 text-center`;
+                pieceElement.textContent = piece.text;
+                pieceElement.draggable = true;
+                pieceElement.dataset.type = piece.type;
+                pieceElement.dataset.id = index;
+                
+                pieceElement.addEventListener('dragstart', (e) => {
+                    draggedPiece = e.target;
+                    setTimeout(() => {
+                        e.target.classList.add('opacity-0');
+                    }, 0);
+                });
+                
+                pieceElement.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('opacity-0');
+                });
+                
+                piecesContainer.appendChild(pieceElement);
+            });
+            
+            ['prefix', 'action', 'duration'].forEach(type => {
+                const dropZone = document.createElement('div');
+                dropZone.className = `drop-zone p-3 mb-2 border-2 border-dashed border-gray-500 rounded-lg min-h-12`;
+                dropZone.dataset.type = type;
+                
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.target.classList.add('border-blue-400');
+                });
+                
+                dropZone.addEventListener('dragleave', (e) => {
+                    e.target.classList.remove('border-blue-400');
+                });
+                
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.target.classList.remove('border-blue-400');
+                    
+                    if (draggedPiece.dataset.type === e.target.dataset.type) {
+                        if (e.target.hasChildNodes()) {
+                            piecesContainer.appendChild(e.target.firstChild);
+                        }
+                        e.target.appendChild(draggedPiece);
+                        checkCompletion();
+                    }
+                });
+                
+                completedContainer.appendChild(dropZone);
+            });
+        }
+        
+        function getRandomColor() {
+            const colors = ['blue', 'green', 'purple', 'yellow', 'indigo', 'pink'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        function checkCompletion() {
+            const prefix = completedContainer.querySelector('[data-type="prefix"]').textContent;
+            const action = completedContainer.querySelector('[data-type="action"]').textContent;
+            const duration = completedContainer.querySelector('[data-type="duration"]').textContent;
+            
+            if (prefix && action && duration) {
+                const combination = `${prefix} ${action} ${duration}`;
+                
+                if (!correctCombinations.includes(combination)) {
+                    correctCombinations.push(combination);
+                    score += 10;
+                    scoreElement.textContent = score;
+                    
+                    const completedHabit = document.createElement('div');
+                    completedHabit.className = 'p-3 bg-green-600 rounded-lg mb-2 celebrate';
+                    completedHabit.textContent = combination;
+                    completedContainer.appendChild(completedHabit);
+                    
+                    messageElement.textContent = `Good job! +10 points for "${combination}"`;
+                    setTimeout(() => {
+                        messageElement.textContent = "";
+                    }, 2000);
+                    
+                    completedContainer.querySelectorAll('.drop-zone').forEach(zone => {
+                        zone.innerHTML = '';
+                    });
+                    
+                    if (piecesContainer.children.length < 3) {
+                        generatePuzzle();
+                    }
+                }
+            }
+        }
+        
+        resetBtn.addEventListener('click', () => {
+            score = 0;
+            scoreElement.textContent = score;
+            generatePuzzle();
+        });
+        
+        generatePuzzle();
+    </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Matching Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(74, 222, 128, 0); }
+            50% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.7); }
+        }
+        body {
+            font-family: 'Abril Fatface', cursive;
+            background: linear-gradient(135deg, #111827, #1f2937);
+        }
+        .habit-card {
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .habit-card:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+        }
+        .correct {
+            animation: pulse 0.5s ease, glow 1s ease;
+        }
+        .wrong {
+            animation: shake 0.5s ease;
+        }
+        .selected {
+            animation: float 2s infinite ease-in-out;
+        }
+        .score-change {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: scorePop 1s ease-out forwards;
+        }
+        @keyframes scorePop {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            animation: confettiFall 3s linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-5xl text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">Habit Matching</h1>
+        
+        <div class="p-8 bg-gray-800 rounded-xl shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-green-900/10 pointer-events-none"></div>
+            
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-green-300">Match Habits with Benefits</h2>
+                    <p class="text-green-200">Click a habit and then its matching benefit!</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-2xl">
+                        Score: <span id="score" class="text-orange-400">0</span>
+                    </div>
+                    <div class="text-xl">
+                        Streak: <span id="streak" class="text-purple-400">0</span>
+                    </div>
+                    <button id="reset" class="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition transform hover:scale-105 active:scale-95 shadow-lg">Reset</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <h3 class="text-2xl text-orange-300">Daily Habits</h3>
+                    <div id="habits" class="grid grid-cols-1 gap-4">
+                        <div data-habit="exercise" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-blue-400">Exercise</div>
+                        <div data-habit="reading" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-blue-400">Reading</div>
+                        <div data-habit="meditation" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-blue-400">Meditation</div>
+                        <div data-habit="water" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-blue-400">Drink Water</div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-2xl text-orange-300">Health Benefits</h3>
+                    <div id="benefits" class="grid grid-cols-1 gap-4">
+                        <div data-benefit="strength" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-green-400">Builds Strength</div>
+                        <div data-benefit="knowledge" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-green-400">Gains Knowledge</div>
+                        <div data-benefit="focus" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-green-400">Improves Focus</div>
+                        <div data-benefit="hydration" class="habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-green-400">Better Hydration</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="feedback" class="text-center mt-6 text-xl h-8"></div>
+            <div id="timer" class="text-center text-2xl text-yellow-300 mt-4">Time: <span id="time">60</span>s</div>
+            <div id="progress" class="w-full bg-gray-700 rounded-full h-4 mt-4">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const matches = {
+            exercise: "strength",
+            reading: "knowledge",
+            meditation: "focus",
+            water: "hydration"
+        };
+        
+        const descriptions = {
+            exercise: "Regular physical activity improves health",
+            reading: "Expands knowledge and vocabulary",
+            meditation: "Reduces stress and increases focus",
+            water: "Essential for body functions and energy"
+        };
+        
+        let score = 0;
+        let streak = 0;
+        let timeLeft = 60;
+        let timer;
+        let selectedHabit = null;
+        let gameActive = true;
+        
+        const scoreElement = document.getElementById('score');
+        const streakElement = document.getElementById('streak');
+        const resetBtn = document.getElementById('reset');
+        const feedbackElement = document.getElementById('feedback');
+        const timeElement = document.getElementById('time');
+        const progressBar = document.getElementById('progress-bar');
+        
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 60;
+            timeElement.textContent = timeLeft;
+            progressBar.style.width = '100%';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timeElement.textContent = timeLeft;
+                progressBar.style.width = `${(timeLeft / 60) * 100}%`;
+                
+                if (timeLeft <= 10) {
+                    progressBar.classList.add('bg-red-500');
+                    progressBar.classList.remove('bg-gradient-to-r');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    gameActive = false;
+                    feedbackElement.textContent = "Time's up! Final score: " + score;
+                    feedbackElement.className = "text-center mt-6 text-xl h-8 text-red-400";
+                }
+            }, 1000);
+        }
+        
+        function showScoreChange(amount, element) {
+            const scoreChange = document.createElement('div');
+            scoreChange.className = 'score-change';
+            scoreChange.textContent = `+${amount}`;
+            scoreChange.style.color = amount > 0 ? '#10b981' : '#ef4444';
+            scoreChange.style.left = `${element.offsetLeft + element.offsetWidth/2 - 20}px`;
+            scoreChange.style.top = `${element.offsetTop - 20}px`;
+            
+            document.body.appendChild(scoreChange);
+            
+            setTimeout(() => {
+                scoreChange.remove();
+            }, 1000);
+        }
+        
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+        
+        document.querySelectorAll('#habits div').forEach(habit => {
+            habit.addEventListener('click', () => {
+                if (!gameActive) return;
+                
+                if (selectedHabit) {
+                    selectedHabit.classList.remove('selected', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-600');
+                }
+                
+                selectedHabit = habit;
+                habit.classList.add('selected', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-600');
+                feedbackElement.textContent = descriptions[habit.getAttribute('data-habit')];
+                feedbackElement.className = "text-center mt-6 text-xl h-8 text-blue-300";
+            });
+        });
+        
+        document.querySelectorAll('#benefits div').forEach(benefit => {
+            benefit.addEventListener('click', () => {
+                if (!gameActive || !selectedHabit) return;
+                
+                const habitType = selectedHabit.getAttribute('data-habit');
+                const benefitType = benefit.getAttribute('data-benefit');
+                
+                if (matches[habitType] === benefitType) {
+                    streak++;
+                    score += 10 * streak;
+                    scoreElement.textContent = score;
+                    streakElement.textContent = streak;
+                    
+                    selectedHabit.classList.add('correct', 'bg-gradient-to-r', 'from-green-500', 'to-green-600');
+                    benefit.classList.add('correct', 'bg-gradient-to-r', 'from-green-500', 'to-green-600');
+                    
+                    showScoreChange(10 * streak, benefit);
+                    
+                    if (streak % 3 === 0) {
+                        createConfetti();
+                    }
+                    
+                    feedbackElement.textContent = `Perfect! Streak x${streak}`;
+                    feedbackElement.className = "text-center mt-6 text-xl h-8 text-green-400";
+                    
+                    setTimeout(() => {
+                        selectedHabit.classList.remove('correct', 'selected', 'bg-gradient-to-r', 'from-green-500', 'to-green-600', 'from-orange-500', 'to-orange-600');
+                        benefit.classList.remove('correct', 'bg-gradient-to-r', 'from-green-500', 'to-green-600');
+                        selectedHabit = null;
+                        feedbackElement.textContent = "";
+                    }, 1500);
+                } else {
+                    streak = 0;
+                    streakElement.textContent = streak;
+                    
+                    selectedHabit.classList.add('wrong', 'bg-gradient-to-r', 'from-red-500', 'to-red-600');
+                    benefit.classList.add('wrong', 'bg-gradient-to-r', 'from-red-500', 'to-red-600');
+                    
+                    showScoreChange(-5, benefit);
+                    
+                    feedbackElement.textContent = "Oops! Try again";
+                    feedbackElement.className = "text-center mt-6 text-xl h-8 text-red-400";
+                    
+                    setTimeout(() => {
+                        selectedHabit.classList.remove('wrong', 'selected', 'bg-gradient-to-r', 'from-red-500', 'to-red-600', 'from-orange-500', 'to-orange-600');
+                        benefit.classList.remove('wrong', 'bg-gradient-to-r', 'from-red-500', 'to-red-600');
+                        selectedHabit = null;
+                        feedbackElement.textContent = "";
+                    }, 1500);
+                }
+            });
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            score = 0;
+            streak = 0;
+            scoreElement.textContent = score;
+            streakElement.textContent = streak;
+            feedbackElement.textContent = "";
+            feedbackElement.className = "text-center mt-6 text-xl h-8";
+            document.querySelectorAll('#habits div, #benefits div').forEach(el => {
+                el.className = "habit-card cursor-pointer p-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg hover:from-gray-600 hover:to-gray-700 transition text-center border border-gray-600 hover:border-blue-400";
+            });
+            selectedHabit = null;
+            gameActive = true;
+            progressBar.classList.remove('bg-red-500');
+            progressBar.classList.add('bg-gradient-to-r');
+            startTimer();
+        });
+        
+        startTimer();
+    </script>
+</body>
+</html>
