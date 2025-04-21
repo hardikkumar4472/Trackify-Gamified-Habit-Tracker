@@ -1,4 +1,3 @@
-
 # 🎯 Gamified Habit Tracker
 
 A fun and interactive web-based habit tracker designed to help users build better routines through gamification! Built using **HTML, CSS, JavaScript, PHP, and jQuery**, this project transforms the daily task of habit tracking into an engaging experience with progress levels, rewards, and user-friendly visualizations.
